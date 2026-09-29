@@ -1,0 +1,17 @@
+apiVersion: graph.cosmo.crossplane.io/v1alpha1
+kind: Monograph
+metadata:
+  annotations:
+    meta.upbound.io/example-id: graph/v1alpha1/monograph
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    graphUrl: ${var.monograph_graph_url}
+    name: ${var.monograph_name}
+    namespaceSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    routingUrl: ${var.monograph_routing_url}
+    schema: ${var.monograph_schema}

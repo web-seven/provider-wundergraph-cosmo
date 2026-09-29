@@ -1,0 +1,16 @@
+apiVersion: graph.cosmo.crossplane.io/v1alpha1
+kind: FederatedGraph
+metadata:
+  annotations:
+    meta.upbound.io/example-id: graph/v1alpha1/federatedgraph
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+spec:
+  forProvider:
+    labelMatchers: ${var.label_matchers}
+    name: ${var.name}
+    namespaceSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    routingUrl: ${var.routing_url}

@@ -1,0 +1,17 @@
+apiVersion: graph.cosmo.crossplane.io/v1alpha1
+kind: RouterToken
+metadata:
+  annotations:
+    meta.upbound.io/example-id: graph/v1alpha1/routertoken
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+spec:
+  forProvider:
+    graphSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    name: ${var.name}
+    namespaceSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example

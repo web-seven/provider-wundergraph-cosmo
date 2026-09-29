@@ -1,0 +1,23 @@
+apiVersion: graph.cosmo.crossplane.io/v1alpha1
+kind: FeatureSubgraph
+metadata:
+  annotations:
+    meta.upbound.io/example-id: graph/v1alpha1/featuresubgraph
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+spec:
+  forProvider:
+    baseSubgraphSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    name: ${var.name}
+    namespaceSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    readme: ${var.readme}
+    routingUrl: ${var.routing_url}
+    schema: ${var.schema}
+    subscriptionProtocol: ${var.subscription_protocol}
+    subscriptionUrl: ${var.subscription_url}
+    websocketSubprotocol: ${var.websocket_subprotocol}

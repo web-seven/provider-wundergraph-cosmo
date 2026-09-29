@@ -1,0 +1,20 @@
+apiVersion: graph.cosmo.m.crossplane.io/v1alpha1
+kind: FeatureFlag
+metadata:
+  annotations:
+    meta.upbound.io/example-id: graph/v1alpha1/featureflag
+  labels:
+    testing.upbound.io/example-name: example
+  name: example
+  namespace: crossplane-system
+spec:
+  forProvider:
+    featureSubgraphsSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    isEnabled: ${var.is_enabled}
+    labels: ${var.labels}
+    name: ${var.name}
+    namespaceSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example

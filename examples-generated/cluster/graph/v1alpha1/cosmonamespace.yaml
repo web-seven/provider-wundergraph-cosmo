@@ -1,0 +1,11 @@
+apiVersion: graph.cosmo.crossplane.io/v1alpha1
+kind: CosmoNamespace
+metadata:
+  annotations:
+    meta.upbound.io/example-id: graph/v1alpha1/cosmonamespace
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+spec:
+  forProvider:
+    name: ${var.name}

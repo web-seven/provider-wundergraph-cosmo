@@ -1,0 +1,18 @@
+apiVersion: graph.cosmo.m.crossplane.io/v1alpha1
+kind: Subgraph
+metadata:
+  annotations:
+    meta.upbound.io/example-id: graph/v1alpha1/subgraph
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+  namespace: crossplane-system
+spec:
+  forProvider:
+    labels: ${var.labels}
+    name: ${var.name}
+    namespaceSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    routingUrl: ${var.routing_url}
+    schema: ${var.schema}
