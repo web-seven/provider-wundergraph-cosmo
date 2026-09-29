@@ -1,0 +1,72 @@
+apiVersion: graph.cosmo.crossplane.io/v1alpha1
+kind: CosmoNamespace
+metadata:
+  name: example
+  labels:
+    testing.upbound.io/example-name: example
+spec:
+  forProvider:
+    name: crossplane-example
+  providerConfigRef:
+    name: default
+---
+apiVersion: graph.cosmo.crossplane.io/v1alpha1
+kind: FederatedGraph
+metadata:
+  name: example
+  labels:
+    testing.upbound.io/example-name: example
+spec:
+  forProvider:
+    name: example-graph
+    routingUrl: http://router.example.com/graphql
+    labelMatchers:
+      - team=example
+    namespaceSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+  providerConfigRef:
+    name: default
+---
+apiVersion: graph.cosmo.crossplane.io/v1alpha1
+kind: Subgraph
+metadata:
+  name: example
+  labels:
+    testing.upbound.io/example-name: example
+spec:
+  forProvider:
+    name: example-subgraph
+    routingUrl: http://subgraph.example.com/graphql
+    labels:
+      team: example
+    schema: |
+      type Query {
+        hello: String
+      }
+    namespaceSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+  providerConfigRef:
+    name: default
+---
+apiVersion: graph.cosmo.crossplane.io/v1alpha1
+kind: RouterToken
+metadata:
+  name: example
+  labels:
+    testing.upbound.io/example-name: example
+spec:
+  forProvider:
+    name: example-router-token
+    graphSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    namespaceSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+  providerConfigRef:
+    name: default
+  writeConnectionSecretToRef:
+    name: example-router-token
+    namespace: crossplane-system

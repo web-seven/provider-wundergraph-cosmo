@@ -1,0 +1,303 @@
+name: wundergraph/cosmo
+resources:
+    cosmo_contract:
+        subCategory: ""
+        description: A contract is a Terraform resource representing a single subgraph with GraphQL Federation enabled, allowing developers to build versatile, multi-audience graphs while simplifying development and ensuring maintainability. For more information, refer to the Cosmo Documentation at https://cosmo-docs.wundergraph.com/concepts/schema-contracts.
+        name: cosmo_contract
+        title: cosmo_contract Resource - cosmo
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "exclude_tags": "${var.exclude_tags}",
+                  "include_tags": "${var.include_tags}",
+                  "name": "${var.name}",
+                  "namespace": "${var.namespace}",
+                  "routing_url": "${var.routing_url}",
+                  "source": "${var.source_graph_name}"
+                }
+              references:
+                exclude_tags: var.exclude_tags
+                include_tags: var.include_tags
+                name: var.name
+                namespace: var.namespace
+                routing_url: var.routing_url
+                source: var.source_graph_name
+        argumentDocs:
+            admission_webhook_secret: (String)
+            admission_webhook_url: (String)
+            exclude_tags: (List of String)
+            id: (String) The ID of this resource.
+            include_tags: (List of String)
+            name: (String)
+            namespace: (String)
+            readme: (String)
+            routing_url: (String)
+            source: (String)
+            supports_federation: (Boolean)
+        importStatements:
+            - |-
+              # Contracts can be imported using the UUID of the contract, e.g.
+              terraform import cosmo_contract.example 0b1b1b1b-1b1b-1b1b-1b1b-1b1b1b1b1b1b
+    cosmo_feature_flag:
+        subCategory: ""
+        description: A feature flag is a group of one or more feature subgraphs. Each feature subgraph represents a replacement of a specific base subgraph that composes a federated graph. Feature flags define labels that dictate the federated graphs to which they will apply when enabled. Setting the corresponding feature-flag header or cookie value allows different graph constellations to be served to clients. For more information on feature flags, please refer to the Cosmo Documentation https://cosmo-docs.wundergraph.com/cli/feature-flags. To learn more about the concept of feature flags, please refer to the concept https://cosmo-docs.wundergraph.com/concepts/feature-flags.
+        name: cosmo_feature_flag
+        title: cosmo_feature_flag Resource - cosmo
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "feature_subgraphs": "${var.feature_subgraphs}",
+                  "is_enabled": "${var.is_enabled}",
+                  "labels": "${var.labels}",
+                  "name": "${var.name}",
+                  "namespace": "${var.namespace}"
+                }
+              references:
+                feature_subgraphs: var.feature_subgraphs
+                is_enabled: var.is_enabled
+                labels: var.labels
+                name: var.name
+                namespace: var.namespace
+        argumentDocs:
+            created_at: (String) The timestamp when the feature flag was created.
+            created_by: (String) The user who created the feature flag.
+            feature_subgraphs: |-
+                (Set of String) The list of feature subgraphs associated with the feature flag.
+                At least one feature subgraph must be provided.
+            id: (String) The unique identifier of the feature flag.
+            is_enabled: (Boolean) Indicates whether the feature flag is enabled.
+            labels: |-
+                (Map of String) The labels associated with the feature flag. These labels indicate which
+                federated graphs can be associated with the feature flag to enabled calls against the corresponding feature subgraph.
+            name: (String) The name of the feature flag.
+            namespace: (String) The namespace of the feature flag.
+            updated_at: (String) The timestamp when the feature flag was last updated.
+        importStatements:
+            - |-
+              # Feature flags can be imported using the namespace and name separated by dot, e.g.
+              terraform import cosmo_feature_flag.example mynamespace.myfeature
+    cosmo_feature_subgraph:
+        subCategory: ""
+        description: This resource handles feature subgraphs. Feature subgraphs are a special type of subgraph that can be used to extend the functionality of the platform. They require a base subgraph to be specified and can be used to add additional functionality to the base subgraph based on a specialized schema, that is published to this subgraph. For more information on feature subgraphs, please refer to the Cosmo Documentation https://cosmo-docs.wundergraph.com/cli/feature-subgraph.
+        name: cosmo_feature_subgraph
+        title: cosmo_feature_subgraph Resource - cosmo
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "base_subgraph_name": "${var.base_subgraph_name}",
+                  "name": "${var.name}",
+                  "namespace": "${var.namespace}",
+                  "readme": "${var.readme}",
+                  "routing_url": "${var.routing_url}",
+                  "schema": "${var.schema}",
+                  "subscription_protocol": "${var.subscription_protocol}",
+                  "subscription_url": "${var.subscription_url}",
+                  "websocket_subprotocol": "${var.websocket_subprotocol}"
+                }
+              references:
+                base_subgraph_name: var.base_subgraph_name
+                name: var.name
+                namespace: var.namespace
+                readme: var.readme
+                routing_url: var.routing_url
+                schema: var.schema
+                subscription_protocol: var.subscription_protocol
+                subscription_url: var.subscription_url
+                websocket_subprotocol: var.websocket_subprotocol
+        argumentDocs:
+            base_subgraph_name: (String) The name of the base subgraph that this feature subgraph extends.
+            id: (String) The unique identifier of the feature subgraph.
+            name: (String) The name of the feature subgraph.
+            namespace: (String) The namespace to create the feature subgraph in.
+            readme: (String) The readme for the subgraph.
+            routing_url: (String) The routing URL of the feature subgraph.
+            schema: (String) The schema for the subgraph.
+            subscription_protocol: (String) The subscription protocol for the subgraph.
+            subscription_url: (String) The subscription URL for the subgraph.
+            websocket_subprotocol: (String) The websocket subprotocol for the subgraph.
+        importStatements:
+            - |-
+              # Feature subgraphs can be imported using the UUID
+              terraform import cosmo_feature_subgraph.example 0b1b1b1b-1b1b-1b1b-1b1b-1b1b1b1b1b1b
+    cosmo_federated_graph:
+        subCategory: ""
+        description: The federated graph resource is used to manage a single, unified data graph that is composed of multiple subgraphs. For more information on federated graphs, please refer to the Cosmo Documentation https://cosmo-docs.wundergraph.com/cli/federated-graph.
+        name: cosmo_federated_graph
+        title: cosmo_federated_graph Resource - cosmo
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "label_matchers": "${var.label_matchers}",
+                  "name": "${var.name}",
+                  "namespace": "${var.namespace}",
+                  "routing_url": "${var.routing_url}"
+                }
+              references:
+                label_matchers: var.label_matchers
+                name: var.name
+                namespace: var.namespace
+                routing_url: var.routing_url
+        argumentDocs:
+            admission_webhook_secret: (String, Sensitive) The secret token used to authenticate the admission webhook requests.
+            admission_webhook_url: (String) The URL for the admission webhook that will be triggered during graph operations.
+            id: (String) The unique identifier of the federated graph resource, automatically generated by the system.
+            label_matchers: (List of String) A list of label matchers used to select the services that will form the federated graph.
+            name: (String) The name of the federated graph. This is used to identify the graph and must be unique within the namespace.
+            namespace: (String) The namespace in which the federated graph is located. Defaults to 'default' if not provided.
+            readme: (String) Readme content for the federated graph.
+            routing_url: (String) The URL of the service that routes requests to the federated graph.
+        importStatements:
+            - |-
+              # Federated Graphs can be imported using the UUID of the federated graph.
+              terraform import cosmo_federated_graph.example 0b1b1b1b-1b1b-1b1b-1b1b-1b1b1b1b1b1b
+    cosmo_monograph:
+        subCategory: ""
+        description: A monograph is a resource that represents a single subgraph with GraphQL Federation disabled. For more information on monographs, please refer to the Cosmo Documentation https://cosmo-docs.wundergraph.com/cli/monograph.
+        name: cosmo_monograph
+        title: cosmo_monograph Resource - cosmo
+        examples:
+            - name: example
+              manifest: |-
+                {
+                  "graph_url": "${var.monograph_graph_url}",
+                  "name": "${var.monograph_name}",
+                  "namespace": "${var.monograph_namespace}",
+                  "routing_url": "${var.monograph_routing_url}",
+                  "schema": "${var.monograph_schema}"
+                }
+              references:
+                graph_url: var.monograph_graph_url
+                name: var.monograph_name
+                namespace: var.monograph_namespace
+                routing_url: var.monograph_routing_url
+                schema: var.monograph_schema
+        argumentDocs:
+            admission_webhook_secret: (String) The admission webhook secret for the monograph.
+            admission_webhook_url: (String) The admission webhook URL for the monograph.
+            graph_url: (String) The GraphQL endpoint URL of the monograph.
+            id: (String) The unique identifier of the monograph resource.
+            name: (String) The name of the monograph.
+            namespace: (String) The namespace in which the monograph is located.
+            readme: (String) The readme for the subgraph.
+            routing_url: (String) The routing URL for the monograph.
+            schema: (String) The schema for the subgraph.
+            subscription_protocol: (String) The subscription protocol for the subgraph.
+            subscription_url: (String) The subscription URL for the subgraph.
+            websocket_subprotocol: (String) The websocket subprotocol for the subgraph.
+        importStatements:
+            - |-
+              # Monographs can be imported using the UUID of the monograph, e.g.
+              terraform import cosmo_monograph.example 0b1b1b1b-1b1b-1b1b-1b1b-1b1b1b1b1b1b
+    cosmo_namespace:
+        subCategory: ""
+        description: Namespaces group federated graphs and subgraphs. Each organization has a default, non-deletable namespace. For more information on namespaces, please refer to the Cosmo Documentation https://cosmo-docs.wundergraph.com/cli/namespace.
+        name: cosmo_namespace
+        title: cosmo_namespace Resource - cosmo
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "name": "${var.name}"
+                }
+              references:
+                name: var.name
+        argumentDocs:
+            id: (String) The unique identifier of the namespace resource.
+            name: (String) The name of the namespace.
+        importStatements:
+            - |-
+              # Namespaces can be imported using the name of the namespace
+              terraform import cosmo_namespace.example my-namespace
+              # or alternatively, the UUID of the namespace
+              terraform import cosmo_namespace.example 0b1b1b1b-1b1b-1b1b-1b1b-1b1b1b1b1b1b
+    cosmo_persisted_operations:
+        subCategory: ""
+        description: 'Manages the full set of persisted operations (safelisted GraphQL operations) registered for a client of a federated graph. This resource owns every persisted operation of the given client: operations pushed outside of Terraform (e.g. via wgc operations push) to the same client will show up as drift and be removed on the next apply. Destroying the resource deletes the operations it manages but leaves the client record itself in place. Each operation value must be the raw contents of a plain GraphQL document. The JSON manifest formats accepted by wgc operations push (Apollo persisted query manifests, Relay query maps) are not supported yet and are rejected at plan time. Operations are content-addressed: their identifier is the hex-encoded SHA-256 hash of their contents, matching the behavior of wgc operations push. Publishing is not transactional: if an operation conflicts with an existing one (same id, different contents), the create or update fails but the non-conflicting operations remain registered; re-applying after fixing the conflict converges, since publishing is idempotent. Existing operations can be imported with the id format federated_graph_name:namespace:client_name. For more information on persisted operations, please refer to the Cosmo Documentation https://cosmo-docs.wundergraph.com/router/persisted-queries/persisted-operations.'
+        name: cosmo_persisted_operations
+        title: cosmo_persisted_operations Resource - cosmo
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "client_name": "${var.client_name}",
+                  "federated_graph_name": "${var.federated_graph_name}",
+                  "namespace": "${var.namespace}",
+                  "operations": "${{\n    for file in fileset(path.module, \"operations/*.graphql\") :\n    trimsuffix(basename(file), \".graphql\") =\u003e file(\"${path.module}/${file}\")\n  }}"
+                }
+              references:
+                client_name: var.client_name
+                federated_graph_name: var.federated_graph_name
+                namespace: var.namespace
+        argumentDocs:
+            client_name: (String) The name of the client the operations belong to (e.g. web, ios). The client is created on first publish.
+            federated_graph_name: (String) The name of the federated graph to register the operations on.
+            id: (String) The unique identifier of the client the operations are registered for.
+            namespace: (String) The namespace of the federated graph.
+            operations: (Map of String) The persisted operations as a map of an arbitrary label to the contents of a plain GraphQL document. JSON manifests are not supported yet.
+        importStatements: []
+    cosmo_router_token:
+        subCategory: ""
+        description: Generates a token that is limited to a federated graph. This token allows the router to interact with the platform and send metrics to the collectors. For more information on router tokens, please refer to the Cosmo Documentation https://cosmo-docs.wundergraph.com/cli/router/token/create.
+        name: cosmo_router_token
+        title: cosmo_router_token Resource - cosmo
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "graph_name": "${var.graph_name}",
+                  "name": "${var.name}",
+                  "namespace": "${var.namespace}"
+                }
+              references:
+                graph_name: var.graph_name
+                name: var.name
+                namespace: var.namespace
+        argumentDocs:
+            graph_name: (String) The name of the graph to create the token for.
+            id: (String) The unique identifier of the router token.
+            name: (String) The name of the router token.
+            namespace: (String) The namespace to create the token in.
+            token: (String, Sensitive) The token to be used for the router.
+        importStatements: []
+    cosmo_subgraph:
+        subCategory: ""
+        description: This resource handles subgraphs. Each subgraph is responsible for defining its specific segment of the schema and managing the related queries. For more information on subgraphs, please refer to the Cosmo Documentation https://cosmo-docs.wundergraph.com/cli/subgraph.
+        name: cosmo_subgraph
+        title: cosmo_subgraph Resource - cosmo
+        examples:
+            - name: test
+              manifest: |-
+                {
+                  "labels": "${var.labels}",
+                  "name": "${var.name}",
+                  "namespace": "${var.namespace}",
+                  "routing_url": "${var.routing_url}",
+                  "schema": "${var.schema}"
+                }
+              references:
+                labels: var.labels
+                name: var.name
+                namespace: var.namespace
+                routing_url: var.routing_url
+                schema: var.schema
+        argumentDocs:
+            id: (String) The unique identifier of the subgraph resource.
+            is_event_driven_graph: (Boolean) Indicates if the subgraph is event-driven.
+            labels: (Map of String) Labels for the subgraph.
+            name: (String) The name of the subgraph.
+            namespace: (String) The namespace in which the subgraph is located.
+            readme: (String) The readme for the subgraph.
+            routing_url: (String) The routing URL of the subgraph. Routing URL is required for normal subgraphs but not for event driven subgraphs.
+            schema: (String) The schema for the subgraph.
+            subscription_protocol: (String) The subscription protocol for the subgraph.
+            subscription_url: (String) The subscription URL for the subgraph.
+            unset_labels: (Boolean) Unset labels for the subgraph.
+            websocket_subprotocol: (String) The websocket subprotocol for the subgraph.
+        importStatements:
+            - |-
+              # Subgraphs can be imported using the UUID of the subgraph, e.g.
+              terraform import cosmo_subgraph.example 0b1b1b1b-1b1b-1b1b-1b1b-1b1b1b1b1b1b

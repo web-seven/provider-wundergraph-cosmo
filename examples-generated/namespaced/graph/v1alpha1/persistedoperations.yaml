@@ -1,0 +1,23 @@
+apiVersion: graph.cosmo.m.crossplane.io/v1alpha1
+kind: PersistedOperations
+metadata:
+  annotations:
+    meta.upbound.io/example-id: graph/v1alpha1/persistedoperations
+  labels:
+    testing.upbound.io/example-name: test
+  name: test
+  namespace: crossplane-system
+spec:
+  forProvider:
+    clientName: ${var.client_name}
+    federatedGraphSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    namespaceSelector:
+      matchLabels:
+        testing.upbound.io/example-name: example
+    operations: |-
+      ${{
+          for file in fileset(path.module, "operations/*.graphql") :
+          trimsuffix(basename(file), ".graphql") => file("${path.module}/${file}")
+        }}

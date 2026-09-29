@@ -1,0 +1,6 @@
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-wundergraph-cosmo
+spec:
+  package: ghcr.io/web-seven/provider-wundergraph-cosmo:v0.1.0
