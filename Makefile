@@ -80,6 +80,29 @@ XPKGS = $(PROJECT_NAME)
 -include build/makelib/xpkg.mk
 
 # ====================================================================================
+# Upbound Marketplace
+
+UPBOUND_REGISTRY ?= xpkg.upbound.io/web7
+
+# Marketplace extensions (icon, readme) are appended to the published package
+# with `up alpha xpkg append`; the tree is assembled under $(OUTPUT_DIR).
+EXTENSIONS_DIR ?= $(OUTPUT_DIR)/extensions
+EXTENSIONS_PKG ?= $(UPBOUND_REGISTRY)/$(PROJECT_NAME):$(VERSION)
+
+package.extensions:
+	@echo "Assembling marketplace extensions tree at $(EXTENSIONS_DIR)"
+	@rm -rf $(EXTENSIONS_DIR)
+	@mkdir -p $(EXTENSIONS_DIR)/icons $(EXTENSIONS_DIR)/readme
+	@cp extensions/icons/icon.svg $(EXTENSIONS_DIR)/icons/icon.svg
+	@cp extensions/readme/readme.md $(EXTENSIONS_DIR)/readme/readme.md
+
+publish.extensions: package.extensions
+	@echo "Appending marketplace extensions to $(EXTENSIONS_PKG)"
+	@up alpha xpkg append --extensions-root=$(EXTENSIONS_DIR) --destination=$(EXTENSIONS_PKG) $(EXTENSIONS_PKG)
+
+.PHONY: package.extensions publish.extensions
+
+# ====================================================================================
 # Fallthrough
 
 # run `make help` to see the targets and options
