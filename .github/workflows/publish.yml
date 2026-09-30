@@ -3,9 +3,9 @@ name: Publish Provider Package
 on:
   push:
     tags:
-      # Release tags only; pre-release tags are handled by pre-release.yml.
+      # Pre-release tags (e.g. v0.1.0-rc.1) are published to ghcr.io and a
+      # GitHub pre-release only; stable tags also go to the Upbound Marketplace.
       - 'v*'
-      - '!v*-*'
 
 env:
   DOCKER_BUILDX_VERSION: 'v0.23.0'
@@ -24,11 +24,17 @@ jobs:
       packages: write
     outputs:
       version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
 
     steps:
       - name: Resolve release version
         id: version
-        run: echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+        run: |
+          echo "version=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          case "$GITHUB_REF_NAME" in
+            *-*) echo "prerelease=true" >> $GITHUB_OUTPUT ;;
+            *) echo "prerelease=false" >> $GITHUB_OUTPUT ;;
+          esac
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -105,7 +111,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
 
       - name: Login to Upbound Marketplace
-        if: env.XPKG_ACCESS_ID != ''
+        if: env.XPKG_ACCESS_ID != '' && steps.version.outputs.prerelease == 'false'
         uses: docker/login-action@v3
         with:
           registry: xpkg.upbound.io
@@ -113,7 +119,7 @@ jobs:
           password: ${{ secrets.XPKG_TOKEN }}
 
       - name: Publish to Upbound Marketplace
-        if: env.XPKG_ACCESS_ID != ''
+        if: env.XPKG_ACCESS_ID != '' && steps.version.outputs.prerelease == 'false'
         run: make publish BRANCH_NAME=main XPKG_REG_ORGS=${UPBOUND_REGISTRY} XPKG_REG_ORGS_NO_PROMOTE=${UPBOUND_REGISTRY}
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -121,7 +127,7 @@ jobs:
   append-marketplace-extensions:
     needs: publish-release
     runs-on: ubuntu-22.04
-    if: ${{ needs.publish-release.result == 'success' }}
+    if: ${{ needs.publish-release.result == 'success' && needs.publish-release.outputs.prerelease == 'false' }}
     env:
       XPKG_ACCESS_ID: ${{ secrets.XPKG_ACCESS_ID }}
 
@@ -189,6 +195,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.publish-release.outputs.version }}
+          PRERELEASE: ${{ needs.publish-release.outputs.prerelease }}
         run: |
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
@@ -197,5 +204,6 @@ jobs:
               --repo "$GITHUB_REPOSITORY" \
               --verify-tag \
               --title "$TAG" \
-              --generate-notes
+              --generate-notes \
+              --prerelease="$PRERELEASE"
           fi
