@@ -82,6 +82,15 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           BUILD_ARGS: "--load"
 
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ steps.version.outputs.version }}
+          path: |
+            _output/bin/*/provider
+            _output/xpkg/**/*.xpkg
+          if-no-files-found: error
+
       - name: Login to ghcr.io
         uses: docker/login-action@v3
         with:
@@ -145,3 +154,48 @@ jobs:
         run: make publish.extensions
         env:
           VERSION: ${{ needs.publish-release.outputs.version }}
+
+  github-release:
+    needs: publish-release
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Release Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-${{ needs.publish-release.outputs.version }}
+          path: _output
+
+      - name: Package Release Assets
+        env:
+          VERSION: ${{ needs.publish-release.outputs.version }}
+        run: |
+          mkdir -p dist
+          for bin in _output/bin/*/provider; do
+            platform=$(basename "$(dirname "$bin")")
+            chmod +x "$bin"
+            tar -czf "dist/provider-wundergraph-cosmo_${VERSION}_${platform}.tar.gz" -C "$(dirname "$bin")" provider
+          done
+          for pkg in _output/xpkg/*/*.xpkg; do
+            platform=$(basename "$(dirname "$pkg")")
+            cp "$pkg" "dist/provider-wundergraph-cosmo_${VERSION}_${platform}.xpkg"
+          done
+          (cd dist && sha256sum * > checksums.txt)
+          ls -l dist
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.publish-release.outputs.version }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" dist/* \
+              --repo "$GITHUB_REPOSITORY" \
+              --verify-tag \
+              --title "$TAG" \
+              --generate-notes
+          fi
