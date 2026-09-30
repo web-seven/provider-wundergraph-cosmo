@@ -1,5 +1,10 @@
 # Provider WunderGraph Cosmo
 
+[![CI](https://github.com/web-seven/provider-wundergraph-cosmo/actions/workflows/ci.yml/badge.svg)](https://github.com/web-seven/provider-wundergraph-cosmo/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/web-seven/provider-wundergraph-cosmo?include_prereleases)](https://github.com/web-seven/provider-wundergraph-cosmo/releases)
+[![Upbound Marketplace](https://img.shields.io/badge/Upbound-Marketplace-6D64F5)](https://marketplace.upbound.io/providers/web7/provider-wundergraph-cosmo)
+[![License](https://img.shields.io/github/license/web-seven/provider-wundergraph-cosmo)](https://github.com/web-seven/provider-wundergraph-cosmo/blob/main/LICENSE)
+
 `provider-wundergraph-cosmo` is a [Crossplane](https://crossplane.io/) provider
 built using [Upjet](https://github.com/crossplane/upjet) code generation tools.
 It exposes XRM-conformant managed resources for
