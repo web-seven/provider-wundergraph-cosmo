@@ -2,6 +2,18 @@ apiVersion: meta.pkg.crossplane.io/v1
 kind: Provider
 metadata:
   name: provider-wundergraph-cosmo
+  annotations:
+    meta.crossplane.io/maintainer: web-seven <info@web-seven.io>
+    meta.crossplane.io/source: github.com/web-seven/provider-wundergraph-cosmo
+    meta.crossplane.io/license: Apache-2.0
+    meta.crossplane.io/description: |
+      Manage WunderGraph Cosmo namespaces, federated graphs and subgraphs
+      declaratively from Kubernetes via Crossplane.
+    meta.crossplane.io/readme: |
+      Crossplane provider for WunderGraph Cosmo, generated with Upjet from the
+      wundergraph/cosmo Terraform provider.
+    meta.crossplane.io/iconURI: https://raw.githubusercontent.com/web-seven/provider-wundergraph-cosmo/main/assets/images/icon.png
+    friendly-name.meta.crossplane.io: Provider WunderGraph Cosmo
 spec:
   capabilities:
     - SafeStart
