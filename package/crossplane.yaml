@@ -12,7 +12,7 @@ metadata:
     meta.crossplane.io/readme: |
       Crossplane provider for WunderGraph Cosmo, generated with Upjet from the
       wundergraph/cosmo Terraform provider.
-    meta.crossplane.io/iconURI: https://raw.githubusercontent.com/web-seven/provider-wundergraph-cosmo/main/assets/images/icon.png
+    meta.crossplane.io/iconURI: https://raw.githubusercontent.com/web-seven/provider-wundergraph-cosmo/main/assets/images/icon.svg
     friendly-name.meta.crossplane.io: Provider WunderGraph Cosmo
 spec:
   capabilities:
