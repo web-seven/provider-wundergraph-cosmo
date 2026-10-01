@@ -6,9 +6,9 @@
 [![License](https://img.shields.io/github/license/web-seven/provider-wundergraph-cosmo)](https://github.com/web-seven/provider-wundergraph-cosmo/blob/main/LICENSE)
 
 `provider-wundergraph-cosmo` is a [Crossplane](https://crossplane.io/) provider
-built using [Upjet](https://github.com/crossplane/upjet) code generation tools.
-It exposes XRM-conformant managed resources for
-[WunderGraph Cosmo](https://cosmo-docs.wundergraph.com/).
+that manages [WunderGraph Cosmo](https://cosmo-docs.wundergraph.com/)
+namespaces, federated graphs, subgraphs and related resources as Kubernetes
+objects.
 
 ## Resources
 
@@ -39,20 +39,27 @@ graphs and subgraphs (`sourceRef`, `graphRef`, `federatedGraphRef`,
 
 ## Getting Started
 
-Install the provider:
+### Install the provider
 
-```console
-kubectl apply -f examples/install.yaml
+```yaml
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-wundergraph-cosmo
+spec:
+  package: xpkg.upbound.io/web7/provider-wundergraph-cosmo:v0.1.2
 ```
 
-Create a secret with the Cosmo API key (`api_url` is optional and defaults to
+### Configure credentials
+
+Create a secret with a Cosmo API key (`api_url` is optional and defaults to
 `https://cosmo-cp.wundergraph.com`):
 
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: example-creds
+  name: cosmo-creds
   namespace: crossplane-system
 type: Opaque
 stringData:
@@ -63,33 +70,159 @@ stringData:
     }
 ```
 
-Then create a `ProviderConfig` (see `examples/*/providerconfig`) and resources
-(see `examples/*/graph`).
+Then create a `ProviderConfig` that points to it. The examples below use the
+namespaced kinds, so the `ProviderConfig` lives in the same namespace as the
+resources:
 
-## Developing
-
-Run code-generation pipeline:
-
-```console
-make generate
+```yaml
+apiVersion: cosmo.m.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+  namespace: crossplane-system
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      name: cosmo-creds
+      namespace: crossplane-system
+      key: credentials
 ```
 
-Run against a Kubernetes cluster:
+A `ClusterProviderConfig` (`cosmo.m.crossplane.io/v1beta1`) with the same spec
+can be shared by resources in all namespaces.
 
-```console
-make run
+### Create a Cosmo namespace
+
+Federated graphs and subgraphs belong to a Cosmo namespace:
+
+```yaml
+apiVersion: graph.cosmo.m.crossplane.io/v1alpha1
+kind: CosmoNamespace
+metadata:
+  name: production
+  namespace: crossplane-system
+spec:
+  forProvider:
+    name: production
+  providerConfigRef:
+    kind: ProviderConfig
+    name: default
 ```
 
-Build, push, and install:
+### Create a federated graph
 
-```console
-make all
+A federated graph composes every subgraph whose labels match its
+`labelMatchers`. `routingUrl` is the URL of the router that serves the graph:
+
+```yaml
+apiVersion: graph.cosmo.m.crossplane.io/v1alpha1
+kind: FederatedGraph
+metadata:
+  name: shop
+  namespace: crossplane-system
+spec:
+  forProvider:
+    name: shop
+    routingUrl: https://router.example.com/graphql
+    labelMatchers:
+      - team=shop
+    namespaceRef:
+      name: production
+  providerConfigRef:
+    kind: ProviderConfig
+    name: default
 ```
 
-Build binary:
+### Create subgraphs
+
+Each subgraph is published with its schema and labelled so the federated graph
+picks it up:
+
+```yaml
+apiVersion: graph.cosmo.m.crossplane.io/v1alpha1
+kind: Subgraph
+metadata:
+  name: products
+  namespace: crossplane-system
+spec:
+  forProvider:
+    name: products
+    routingUrl: https://products.example.com/graphql
+    labels:
+      team: shop
+    schema: |
+      type Query {
+        products: [Product!]!
+      }
+
+      type Product @key(fields: "id") {
+        id: ID!
+        name: String!
+      }
+    namespaceRef:
+      name: production
+  providerConfigRef:
+    kind: ProviderConfig
+    name: default
+---
+apiVersion: graph.cosmo.m.crossplane.io/v1alpha1
+kind: Subgraph
+metadata:
+  name: reviews
+  namespace: crossplane-system
+spec:
+  forProvider:
+    name: reviews
+    routingUrl: https://reviews.example.com/graphql
+    labels:
+      team: shop
+    schema: |
+      type Product @key(fields: "id") {
+        id: ID!
+        reviews: [Review!]!
+      }
+
+      type Review {
+        rating: Int!
+        body: String
+      }
+    namespaceRef:
+      name: production
+  providerConfigRef:
+    kind: ProviderConfig
+    name: default
+```
+
+### Create a router token
+
+The router needs a token to fetch the federated graph configuration. The token
+is written to the connection secret:
+
+```yaml
+apiVersion: graph.cosmo.m.crossplane.io/v1alpha1
+kind: RouterToken
+metadata:
+  name: shop-router
+  namespace: crossplane-system
+spec:
+  forProvider:
+    name: shop-router
+    graphRef:
+      name: shop
+    namespaceRef:
+      name: production
+  providerConfigRef:
+    kind: ProviderConfig
+    name: default
+  writeConnectionSecretToRef:
+    name: shop-router-token
+```
+
+Check that everything is synced and ready:
 
 ```console
-make build
+kubectl get managed
 ```
 
 ## Report a Bug
