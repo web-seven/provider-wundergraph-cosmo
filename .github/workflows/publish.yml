@@ -3,9 +3,9 @@ name: Publish Provider Package
 on:
   push:
     tags:
-      # Release tags only; pre-release tags are handled by pre-release.yml.
+      # Pre-release tags (e.g. v0.1.0-rc.1) are published to ghcr.io and a
+      # GitHub pre-release only; stable tags also go to the Upbound Marketplace.
       - 'v*'
-      - '!v*-*'
 
 env:
   DOCKER_BUILDX_VERSION: 'v0.23.0'
@@ -24,11 +24,17 @@ jobs:
       packages: write
     outputs:
       version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
 
     steps:
       - name: Resolve release version
         id: version
-        run: echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+        run: |
+          echo "version=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          case "$GITHUB_REF_NAME" in
+            *-*) echo "prerelease=true" >> $GITHUB_OUTPUT ;;
+            *) echo "prerelease=false" >> $GITHUB_OUTPUT ;;
+          esac
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
@@ -82,6 +88,15 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           BUILD_ARGS: "--load"
 
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ steps.version.outputs.version }}
+          path: |
+            _output/bin/*/provider
+            _output/xpkg/**/*.xpkg
+          if-no-files-found: error
+
       - name: Login to ghcr.io
         uses: docker/login-action@v3
         with:
@@ -96,7 +111,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
 
       - name: Login to Upbound Marketplace
-        if: env.XPKG_ACCESS_ID != ''
+        if: env.XPKG_ACCESS_ID != '' && steps.version.outputs.prerelease == 'false'
         uses: docker/login-action@v3
         with:
           registry: xpkg.upbound.io
@@ -104,7 +119,7 @@ jobs:
           password: ${{ secrets.XPKG_TOKEN }}
 
       - name: Publish to Upbound Marketplace
-        if: env.XPKG_ACCESS_ID != ''
+        if: env.XPKG_ACCESS_ID != '' && steps.version.outputs.prerelease == 'false'
         run: make publish BRANCH_NAME=main XPKG_REG_ORGS=${UPBOUND_REGISTRY} XPKG_REG_ORGS_NO_PROMOTE=${UPBOUND_REGISTRY}
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -112,7 +127,7 @@ jobs:
   append-marketplace-extensions:
     needs: publish-release
     runs-on: ubuntu-22.04
-    if: ${{ needs.publish-release.result == 'success' }}
+    if: ${{ needs.publish-release.result == 'success' && needs.publish-release.outputs.prerelease == 'false' }}
     env:
       XPKG_ACCESS_ID: ${{ secrets.XPKG_ACCESS_ID }}
 
@@ -145,3 +160,50 @@ jobs:
         run: make publish.extensions
         env:
           VERSION: ${{ needs.publish-release.outputs.version }}
+
+  github-release:
+    needs: publish-release
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Release Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-${{ needs.publish-release.outputs.version }}
+          path: _output
+
+      - name: Package Release Assets
+        env:
+          VERSION: ${{ needs.publish-release.outputs.version }}
+        run: |
+          mkdir -p dist
+          for bin in _output/bin/*/provider; do
+            platform=$(basename "$(dirname "$bin")")
+            chmod +x "$bin"
+            tar -czf "dist/provider-wundergraph-cosmo_${VERSION}_${platform}.tar.gz" -C "$(dirname "$bin")" provider
+          done
+          for pkg in _output/xpkg/*/*.xpkg; do
+            platform=$(basename "$(dirname "$pkg")")
+            cp "$pkg" "dist/provider-wundergraph-cosmo_${VERSION}_${platform}.xpkg"
+          done
+          (cd dist && sha256sum * > checksums.txt)
+          ls -l dist
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.publish-release.outputs.version }}
+          PRERELEASE: ${{ needs.publish-release.outputs.prerelease }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" dist/* \
+              --repo "$GITHUB_REPOSITORY" \
+              --verify-tag \
+              --title "$TAG" \
+              --generate-notes \
+              --prerelease="$PRERELEASE"
+          fi
