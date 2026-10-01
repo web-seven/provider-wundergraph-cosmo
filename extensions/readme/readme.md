@@ -8,26 +8,24 @@
 `provider-wundergraph-cosmo` is a [Crossplane](https://crossplane.io/) provider
 built using [Upjet](https://github.com/crossplane/upjet) code generation tools.
 It exposes XRM-conformant managed resources for
-[WunderGraph Cosmo](https://cosmo-docs.wundergraph.com/), generated from the
-[wundergraph/cosmo](https://registry.terraform.io/providers/wundergraph/cosmo/latest)
-Terraform provider (v0.5.3).
+[WunderGraph Cosmo](https://cosmo-docs.wundergraph.com/).
 
 ## Resources
 
 All resources are available as cluster-scoped (`graph.cosmo.crossplane.io`)
 and namespaced (`graph.cosmo.m.crossplane.io`) kinds.
 
-| Kind                  | Terraform resource           |
-|-----------------------|------------------------------|
-| `CosmoNamespace`      | `cosmo_namespace`            |
-| `FederatedGraph`      | `cosmo_federated_graph`      |
-| `Subgraph`            | `cosmo_subgraph`             |
-| `FeatureSubgraph`     | `cosmo_feature_subgraph`     |
-| `FeatureFlag`         | `cosmo_feature_flag`         |
-| `Monograph`           | `cosmo_monograph`            |
-| `Contract`            | `cosmo_contract`             |
-| `RouterToken`         | `cosmo_router_token`         |
-| `PersistedOperations` | `cosmo_persisted_operations` |
+| Kind                  | Description          |
+|-----------------------|----------------------|
+| `CosmoNamespace`      | Cosmo namespace      |
+| `FederatedGraph`      | Federated graph      |
+| `Subgraph`            | Subgraph             |
+| `FeatureSubgraph`     | Feature subgraph     |
+| `FeatureFlag`         | Feature flag         |
+| `Monograph`           | Monograph            |
+| `Contract`            | Contract graph       |
+| `RouterToken`         | Router token         |
+| `PersistedOperations` | Persisted operations |
 
 The Cosmo namespace kind is `CosmoNamespace` because a cluster-scoped kind with
 the plural `namespaces` cannot be served by the Kubernetes API.
